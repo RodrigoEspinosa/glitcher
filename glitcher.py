@@ -1,7 +1,9 @@
 #!/usr/bin/python
 
-import random
+from __future__ import division
+
 import argparse
+from random import randint
 
 
 def glitch_image(input_file_name, output_file_name=None):
@@ -10,17 +12,31 @@ def glitch_image(input_file_name, output_file_name=None):
         output_file_name = '{}-glitched.{}'.format(head, tail)
 
     # Open the input file in 'read byte' mode
-    input_file = open(input_file_name, 'rb')
+    input_file_lines = open(input_file_name, 'rb').readlines()
 
     # Open the output file in 'write byte' mode
     output_file = open(output_file_name, 'wb')
 
     # Open and the close the output file
     with output_file as out:
+        # Leave the first line of the bitmap as it is
+        for line_index in range(len(input_file_lines[:1])):
+            # Get the current line
+            line = input_file_lines[line_index]
+
+            # Possible modify only after the first 70 bytes
+            line = line[:70] + (line[70:] * randint(1, 4))
+
+            # Write the -maybe- modified first line
+            out.write(line)
+
+        # Extract the first line from the file to process it
+        input_file_lines = input_file_lines[1:]
+
         # Iterate over each line of bytes from the original file
-        for line in input_file:
+        for line in input_file_lines:
             # Get a random value between 1 and 10000
-            rand = random.randint(1, 10000)
+            rand = randint(2, len(input_file_lines))
 
             # Check if the random value is 2, 4, 6 or 8
             if rand in (2, 4, 6, 8):
